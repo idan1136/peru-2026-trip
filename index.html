@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>פרו 2026 - מסלול טיול</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icons/icon-180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="פרו 2026">
+    <meta name="theme-color" content="#0B0E14">
+    <style>
+        :root {
+            --bg-base: #0B0E14;
+            --bg-surface: #141822;
+            --bg-card: #1C2230;
+            --accent-gold: #F59E0B;
+            --accent-terracotta: #EA580C;
+            --accent-cyan: #06B6D4;
+            --accent-green: #10B981;
+            --accent-red: #EF4444;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --border-subtle: #2A3346;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #030712; color: var(--text-primary); display: flex; justify-content: center; min-height: 100vh; }
+        .mobile-viewport { width: 100%; max-width: 480px; background-color: var(--bg-base); min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
+        .app-header { position: sticky; top: 0; background: rgba(11, 14, 20, 0.95); backdrop-filter: blur(12px); z-index: 50; padding: calc(12px + env(safe-area-inset-top)) 16px 8px 16px; border-bottom: 1px solid var(--border-subtle); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .brand-title { font-size: 1.1rem; font-weight: 800; color: var(--accent-gold); }
+        .date-badge { font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); background: rgba(6, 182, 212, 0.12); padding: 4px 10px; border-radius: 12px; }
+        .day-slider { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+        .day-slider::-webkit-scrollbar { display: none; }
+        .day-chip { flex: 0 0 auto; padding: 6px 14px; border-radius: 18px; background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .day-chip.active { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); font-weight: 800; }
+        .content-area { padding: 16px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+        .widget-card { background: var(--bg-card); border-radius: 16px; padding: 16px; border: 1px solid var(--border-subtle); }
+        .widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .location-name { font-size: 1.25rem; font-weight: 700; color: #FFF; }
+        .altitude-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+        .alt-low { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .alt-med { background: rgba(245, 158, 11, 0.15); color: var(--accent-gold); }
+        .alt-high { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+        .alert-box { margin-top: 10px; padding: 10px; border-radius: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--accent-red); color: #FCA5A5; font-size: 0.82rem; line-height: 1.4; }
+        .section-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 700; }
+        .info-card { background: var(--bg-card); border-radius: 14px; padding: 14px; border: 1px solid var(--border-subtle); margin-bottom: 10px; }
+        .card-title { font-weight: 700; color: var(--accent-terracotta); margin-bottom: 6px; font-size: 0.95rem; }
+        .card-body { font-size: 0.9rem; color: var(--text-primary); line-height: 1.5; white-space: pre-line; }
+        .hotel-card { border-right: 4px solid var(--accent-gold); }
+        .transit-card { border-right: 4px solid var(--accent-cyan); }
+        .app-footer { padding: 12px 12px calc(12px + env(safe-area-inset-bottom)) 12px; text-align: center; font-size: 0.75rem; color: var(--text-secondary); border-top: 1px solid var(--border-subtle); }
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+        .info-btn { background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--accent-gold); font-size: 1rem; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
+        .modal-overlay[hidden] { display: none; }
+        .modal-card { width: 100%; max-width: 480px; background: var(--bg-card); border-radius: 20px 20px 0 0; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); border: 1px solid var(--border-subtle); border-bottom: none; max-height: 80vh; display: flex; flex-direction: column; gap: 10px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-weight: 800; color: var(--accent-gold); font-size: 1rem; }
+        .modal-close { background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-primary); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+        .info-textarea { flex: 1; min-height: 220px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px; color: var(--text-primary); font-size: 0.9rem; line-height: 1.5; resize: vertical; }
+        .modal-hint { font-size: 0.75rem; color: var(--text-secondary); text-align: center; }
+        .install-banner { position: fixed; left: 50%; transform: translateX(-50%); bottom: 12px; width: calc(100% - 24px); max-width: 456px; background: var(--bg-card); border: 1px solid var(--accent-gold); border-radius: 14px; padding: 12px 14px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 10px; z-index: 90; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+        .install-banner[hidden] { display: none; }
+        .install-banner-text { flex: 1; font-size: 0.82rem; line-height: 1.4; color: var(--text-primary); }
+        .install-banner-text b { color: var(--accent-gold); }
+        .install-banner-close { background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-secondary); width: 26px; height: 26px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; flex: 0 0 auto; }
+    </style>
+</head>
+<body>
+<div class="mobile-viewport">
+    <header class="app-header">
+        <div class="header-top">
+            <span class="brand-title">🇵🇪 פרו 2026 - מסלול מלא</span>
+            <div class="header-actions">
+                <button id="info-btn" class="info-btn" aria-label="מידע חשוב וחירום" type="button">🛂</button>
+                <span id="current-date" class="date-badge">14.9.26</span>
+            </div>
+        </div>
+        <div class="day-slider" id="day-chips-container"></div>
+    </header>
+    <main class="content-area">
+        <div class="widget-card">
+            <div class="widget-header">
+                <span id="dest-title" class="location-name">תל אביב / לימה</span>
+                <span id="alt-badge" class="altitude-badge alt-low">⛰️ 0 מטרים</span>
+            </div>
+            <div id="alert-container"></div>
+        </div>
+        <div id="transit-section" style="display: none;">
+            <div class="section-label">🚌 תחבורה וטיסות</div>
+            <div class="info-card transit-card">
+                <div id="transit-text" class="card-body"></div>
+            </div>
+        </div>
+        <div>
+            <div class="section-label">📍 אטרקציות ופעילויות</div>
+            <div id="attractions-container"></div>
+        </div>
+        <div>
+            <div class="section-label">🏨 לינה ויעד סוף יום</div>
+            <div class="info-card hotel-card">
+                <div id="stay-dest" class="card-title"></div>
+                <div id="lodging-text" class="card-body"></div>
+            </div>
+        </div>
+    </main>
+    <footer class="app-footer">24 ימים מלאים • פרו 2026</footer>
+</div>
+<div id="info-modal" class="modal-overlay" hidden>
+    <div class="modal-card">
+        <div class="modal-header">
+            <span class="modal-title">🛂 מידע חשוב וחירום</span>
+            <button id="info-close" class="modal-close" aria-label="סגור" type="button">✕</button>
+        </div>
+        <textarea id="info-textarea" class="info-textarea" placeholder="לדוגמה: מספר פוליסת ביטוח וטלפון חירום, טלפון השגרירות, מספרי דרכונים, פרטים לחסימת כרטיס אשראי..."></textarea>
+        <div class="modal-hint">נשמר אוטומטית על המכשיר שלך בלבד.</div>
+    </div>
+</div>
+<div id="install-banner" class="install-banner" hidden>
+    <div class="install-banner-text">להתקנה כאפליקציה: לחצו על כפתור <b>שיתוף</b> ⬆️ ואז <b>"הוסף למסך הבית"</b></div>
+    <button id="install-banner-close" class="install-banner-close" aria-label="סגור" type="button">✕</button>
+</div>
+<script>
+    const itinerary = [
+        { day: 1, date: "14.9.26", origin: "תל אביב", stay_dest: "לימה", altitude: 0, alt_type: "low", alt_label: "פני הים", transit: "טיסה LY395 | המראה: 05:00, נחיתה במדריד: 09:20\nהמראה: 13:20, נחיתה בלימה: 18:20", attractions: [], lodging: "INNSiDE by Meliá Lima Miraflores\nAv. Diez Canseco 344, מירפלורס, LIMA 18" },
+        { day: 2, date: "15.9.26", origin: "לימה", stay_dest: "לימה", altitude: 0, alt_type: "low", alt_label: "פני הים", transit: "", attractions: ["שדרות הרפובליקה, פלאזה סן מרטין ובפלאסה מאיור שנבנתה ב-1535 ועוצבה על-ידי פרנסיסקו פיזארו."], lodging: "INNSiDE by Meliá Lima Miraflores" },
+        { day: 3, date: "16.9.26", origin: "לימה", stay_dest: "פאראקאס", altitude: 0, alt_type: "low", alt_label: "פני הים", transit: "נסיעה לפאראקס - 260 ק\"מ - 4 שעות", attractions: ["סיור בשמורה הלאומית פאראקאס (Paracas National Reserve) - נוף מדברי הפוגש את האוקיינוס.\nכפר הדייגים Caleta Lagunillas - מפרץ קטן עם סירות דייגים ומסעדות על המים."], lodging: "לינה בפאראקאס" },
+        { day: 4, date: "17.9.26", origin: "פאראקאס", stay_dest: "איקה/ הואקוצינה", altitude: 406, alt_type: "low", alt_label: "גובה נמוך", transit: "", attractions: ["שייט לאיי באייסטאס (\"הגלפגוס הקטנה\") - לצפייה באריות ים, פינגווינים, ציפורים מקננות וגאוגליף ה-Candelabro הענק.", "ביקור בכפר הואקאצ'ינה - עיירה בלב נווה מדבר בין דיונות ענקיות."], lodging: "לינה בהואקאצ'ינה / איקה" },
+        { day: 5, date: "18.9.26", origin: "איקה/ הואקוצינה", stay_dest: "נסיעת לילה באוטובוס לארקיפה", altitude: 2335, alt_type: "low", alt_label: "גובה נמוך", transit: "נסיעת לילה באוטובוס לארקיפה", attractions: ["סיור באגי וגלישת חולות (Sandboarding) בערב באיקה.", "סיור יקבים לטעימות פיסקו."], lodging: "נסיעת לילה באוטובוס (ארקיפה: כ-2,335 מטר מעל פני הים)" },
+        { day: 6, date: "19.9.26", origin: "ארקיפה", stay_dest: "ארקיפה", altitude: 2335, alt_type: "low", alt_label: "גובה נמוך", transit: "", attractions: ["מנזר סנטה קטלינה (Monasterio de Santa Catalina) - \"עיר בתוך עיר\" צבעונית ומרשימה.", "פלאסה דה ארמאס ותצפית ינאהוארה על הר הגעש מיסטי."], lodging: "לינה בארקיפה" },
+        { day: 7, date: "20.9.26", origin: "ארקיפה", stay_dest: "ארקיפה", altitude: 2335, alt_type: "low", alt_label: "גובה נמוך", transit: "", attractions: ["יום סיור עירוני בארקיפה, מוזיאון המומיה חואניטה (Museo Santuarios Andinos)."], lodging: "לינה בארקיפה" },
+        { day: 8, date: "21.9.26", origin: "ארקיפה", stay_dest: "קניון קולקה (צ'יבאי)", altitude: 4910, alt_type: "high", alt_label: "אזהרה: מעבר פטפמפה (4,910 מ')", transit: "נסיעה מארקיפה לכיוון צ'יבאי (רכב עם נהג להשכרה ליומיים).", attractions: ["עקירת דרך מעבר ההרים פטפמפה (4,900m) - נקודת שיא בנסיעה.", "שמורת Salinas y Aguada Blanca (ויקוניות), אזור Patahuasi ותצפית Mirador de los Volcanes."], lodging: "לינה בצ'יבאי / קניון קולקה (כ-3,600m)", alert: "⚠️ מעבר בגובה 4,910 מטר! יש לשתות מים מרובים, להימנע ממאמץ פתאומי וללבוש ביגוד חם." },
+        { day: 9, date: "22.9.26", origin: "קניון קולקה", stay_dest: "פונו", altitude: 3812, alt_type: "med", alt_label: "גובה רב (3,812 מ')", transit: "חזרה ל-Chivay, וב-13:00 אוטובוס תיירים ישיר לפונו (4M Express, 5 שעות).", attractions: ["מוקדם בבוקר: Cruz del Cóndor + תצפיות וכפרים בעמק קולקה."], lodging: "לינה בפונו (כ-3,830m למרגלות אגם הטיטיקאקה)" },
+        { day: 10, date: "23.9.26", origin: "פונו", stay_dest: "פונו - האיים הצפים", altitude: 3812, alt_type: "med", alt_label: "גובה רב (3,812 מ')", transit: "", attractions: ["שייט בסירות מהירות אל האיים הצפים של בני שבט האורוס. התוודאות לבנייה מצמח הטוטורה ולמסורת העתיקה."], lodging: "לינה בפונו" },
+        { day: 11, date: "24.9.26", origin: "פונו", stay_dest: "קוסקו", altitude: 3400, alt_type: "med", alt_label: "גובה בינוני (3,400 מ')", transit: "נסיעה מפונו לקוסקו (אוטובוס תיירים/הסעה).", attractions: ["הגעה לקוסקו והתמקמות."], lodging: "לינה בקוסקו" },
+        { day: 12, date: "25.9.26", origin: "קוסקו", stay_dest: "קוסקו", altitude: 3400, alt_type: "med", alt_label: "גובה בינוני (3,400 מ')", transit: "", attractions: ["ביקור במקדש קוריקנצ'ה (Koricancha), סמטאות העיר ובתי מלאכה."], lodging: "לינה בקוסקו" },
+        { day: 13, date: "26.9.26", origin: "עמק קדוש", stay_dest: "עמק קדוש", altitude: 2790, alt_type: "med", alt_label: "גובה בינוני (2,790 מ')", transit: "", attractions: ["טרק לעמק הקדוש / ביקור בכפר פיסק."], lodging: "לינה בעמק הקדוש" },
+        { day: 14, date: "27.9.26", origin: "עמק קדוש", stay_dest: "עמק קדוש", altitude: 2790, alt_type: "med", alt_label: "גובה בינוני (2,790 מ')", transit: "", attractions: ["מכרות המלח (Salineras de Maras) ואתר מוראי."], lodging: "לינה בעמק הקדוש" },
+        { day: 15, date: "28.9.26", origin: "עמק קדוש", stay_dest: "עמק קדוש", altitude: 5020, alt_type: "high", alt_label: "אזהרה: הר הצבעים (5,020 מ')", transit: "נסיעה מפונו/קוסקו להר הצבעים (Phulawasipata / Vinicunca) - כ-320 ק\"מ, 5 שעות.", attractions: ["חניון תחילת מסלול: 4,600m. טיפוס לפסגת הר הצבעים: כ-5,020-5,036m מעל פני הים."], lodging: "לינה בעמק הקדוש / קוסקו", alert: "🚨 הנקודה הגבוהה ביותר במסלול (5,020m)! חובה לצעוד לאט, לשתות מים מרובים וללבוש שכבות חמות." },
+        { day: 16, date: "29.9.26", origin: "עמק קדוש", stay_dest: "עמק קדוש", altitude: 2790, alt_type: "med", alt_label: "גובה בינוני (2,790 מ')", transit: "אוטובוס לאולטאיטמבו ומשם רכבת.", attractions: ["סיורים נוספים בעמק הקדוש."], lodging: "לינה בעמק הקדוש" },
+        { day: 17, date: "30.9.26", origin: "העמק הקדוש", stay_dest: "העמק הקדוש", altitude: 2790, alt_type: "med", alt_label: "גובה בינוני (2,790 מ')", transit: "הסעה ברכבת למאצ'ו פיצ'ו וחזרה בערב ללינה באולטאיטמבו.", attractions: ["הכנות וסיורים באולטאיטמבו."], lodging: "לינה באולטאיטמבו" },
+        { day: 18, date: "1.10.26", origin: "פוארטו מלדונדו", stay_dest: "פוארטו מלדונדו", altitude: 183, alt_type: "low", alt_label: "גובה נמוך (אמזונס)", transit: "", attractions: ["ביקור במאצ'ו פיצ'ו (Machu Picchu)!"], lodging: "לינה בפוארטו מלדונדו" },
+        { day: 19, date: "2.10.26", origin: "פוארטו מלדונדו", stay_dest: "פוארטו מלדונדו", altitude: 183, alt_type: "low", alt_label: "גובה נמוך (אמזונס)", transit: "נסיעה לשדה התעופה בקוסקו וטיסה לאמזונס", attractions: ["סיורי ג'ונגל ואמזונס."], lodging: "Hacienda Herrera (אמזונס)" },
+        { day: 20, date: "3.10.26", origin: "פוארטו מלדונדו", stay_dest: "פוארטו מלדונדו", altitude: 183, alt_type: "low", alt_label: "גובה נמוך (אמזונס)", transit: "", attractions: ["סיורי ג'ונגל, בעלי חיים ונהג האמזונס."], lodging: "Hacienda Herrera" },
+        { day: 21, date: "4.10.26", origin: "לימה", stay_dest: "לימה", altitude: 0, alt_type: "low", alt_label: "פני הים", transit: "טיסה ללימה", attractions: ["ערב חופשי בלימה."], lodging: "לינה בלימה" },
+        { day: 22, date: "5.10.26", origin: "לימה", stay_dest: "לימה", altitude: 0, alt_type: "low", alt_label: "פני הים", transit: "", attractions: ["קניות וסיור סיום בלימה."], lodging: "לינה בלימה" },
+        { day: 23, date: "6.10.26", origin: "מדריד", stay_dest: "מדריד", altitude: 650, alt_type: "low", alt_label: "גובה נמוך", transit: "טיסה LY398 | המראה מלימה: 20:00, נחיתה במדריד: 14:20\nהמראה ממדריד: 22:50", attractions: ["קונקשן וסיור במדריד."], lodging: "טיסת לילה לישראל" },
+        { day: 24, date: "7.10.26", origin: "מדריד", stay_dest: "תל אביב", altitude: 0, alt_type: "low", alt_label: "פני הים", transit: "נחיתה בתל אביב: 04:25", attractions: ["חזרה לישראל."], lodging: "הגעה הביתה" }
+    ];
+
+    let activeDayIndex = 0;
+
+    function parseItinDate(str) {
+        const [d, m, y] = str.split('.').map(Number);
+        return new Date(2000 + y, m - 1, d);
+    }
+
+    function computeTodayIndex() {
+        const first = parseItinDate(itinerary[0].date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const diffDays = Math.round((today - first) / 86400000);
+        return Math.min(Math.max(diffDays, 0), itinerary.length - 1);
+    }
+
+    function renderSlider() {
+        const container = document.getElementById('day-chips-container');
+        container.innerHTML = '';
+        itinerary.forEach((item, index) => {
+            const chip = document.createElement('button');
+            chip.className = `day-chip ${index === activeDayIndex ? 'active' : ''}`;
+            chip.textContent = `יום ${item.day}`;
+            chip.onclick = () => selectDay(index);
+            container.appendChild(chip);
+        });
+    }
+
+    function selectDay(index) {
+        activeDayIndex = index;
+        renderSlider();
+        const data = itinerary[index];
+        document.getElementById('current-date').textContent = data.date;
+        document.getElementById('dest-title').textContent = data.stay_dest;
+        const altBadge = document.getElementById('alt-badge');
+        altBadge.textContent = `⛰️ ${data.altitude}m (${data.alt_label})`;
+        altBadge.className = `altitude-badge alt-${data.alt_type}`;
+        const alertBox = document.getElementById('alert-container');
+        alertBox.innerHTML = data.alert ? `<div class="alert-box">${data.alert}</div>` : '';
+        const transitSec = document.getElementById('transit-section');
+        if (data.transit) {
+            transitSec.style.display = 'block';
+            document.getElementById('transit-text').textContent = data.transit;
+        } else {
+            transitSec.style.display = 'none';
+        }
+        const attrContainer = document.getElementById('attractions-container');
+        attrContainer.innerHTML = '';
+        if (data.attractions.length === 0) {
+            attrContainer.innerHTML = '<div class="info-card"><div class="card-body">אין פעילויות מתוכננות / יום טיסה ונחיתה.</div></div>';
+        } else {
+            data.attractions.forEach((attr, i) => {
+                const card = document.createElement('div');
+                card.className = 'info-card';
+                card.innerHTML = `<div class="card-title">פעילות ${i+1}</div><div class="card-body">${attr}</div>`;
+                attrContainer.appendChild(card);
+            });
+        }
+        document.getElementById('stay-dest').textContent = `יעד לינה: ${data.stay_dest}`;
+        document.getElementById('lodging-text').textContent = data.lodging || 'ללא מידע מפורט';
+    }
+    renderSlider();
+    selectDay(computeTodayIndex());
+
+    const INFO_STORAGE_KEY = 'peru2026-key-info';
+    const infoBtn = document.getElementById('info-btn');
+    const infoModal = document.getElementById('info-modal');
+    const infoClose = document.getElementById('info-close');
+    const infoTextarea = document.getElementById('info-textarea');
+
+    try {
+        infoTextarea.value = localStorage.getItem(INFO_STORAGE_KEY) || '';
+    } catch (e) { /* private browsing or storage unavailable */ }
+
+    infoTextarea.addEventListener('input', () => {
+        try {
+            localStorage.setItem(INFO_STORAGE_KEY, infoTextarea.value);
+        } catch (e) { /* private browsing or storage unavailable */ }
+    });
+
+    infoBtn.addEventListener('click', () => { infoModal.hidden = false; });
+    infoClose.addEventListener('click', () => { infoModal.hidden = true; });
+    infoModal.addEventListener('click', (e) => {
+        if (e.target === infoModal) infoModal.hidden = true;
+    });
+
+    // --- Install-to-Home-Screen hint (iOS Safari only, when not already installed) ---
+    (function () {
+        const BANNER_DISMISS_KEY = 'peru2026-install-hint-dismissed';
+        const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        const isStandalone = window.navigator.standalone === true ||
+            window.matchMedia('(display-mode: standalone)').matches;
+        let dismissed = false;
+        try { dismissed = localStorage.getItem(BANNER_DISMISS_KEY) === '1'; } catch (e) {}
+
+        if (isIos && !isStandalone && !dismissed) {
+            const banner = document.getElementById('install-banner');
+            banner.hidden = false;
+            document.getElementById('install-banner-close').addEventListener('click', () => {
+                banner.hidden = true;
+                try { localStorage.setItem(BANNER_DISMISS_KEY, '1'); } catch (e) {}
+            });
+        }
+    })();
+
+    // --- Register service worker so the app works fully offline once opened ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch((err) => {
+                console.error('Service worker registration failed:', err);
+            });
+        });
+    }
+</script>
+</body>
+</html>

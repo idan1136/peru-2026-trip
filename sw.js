@@ -2,7 +2,7 @@
 // Cache-first strategy: once installed, the app works fully offline.
 // Bump CACHE_VERSION whenever index.html (or any cached asset) changes,
 // so returning devices pick up the update next time they're online.
-const CACHE_VERSION = 'peru2026-v1';
+const CACHE_VERSION = 'peru2026-v2';
 
 const CORE_ASSETS = [
   './',

@@ -72,6 +72,10 @@
         .install-banner-text { flex: 1; font-size: 0.82rem; line-height: 1.4; color: var(--text-primary); }
         .install-banner-text b { color: var(--accent-gold); }
         .install-banner-close { background: var(--bg-surface); border: 1px solid var(--border-subtle); color: var(--text-secondary); width: 26px; height: 26px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; flex: 0 0 auto; }
+        a.location-name { text-decoration: none; }
+        .inline-link { color: var(--accent-cyan); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; font-weight: 700; }
+        .inline-link:visited { color: var(--accent-cyan); }
+        .lodging-rest { margin-top: 4px; color: var(--text-primary); }
     </style>
 </head>
 <body>
@@ -89,7 +93,7 @@
     <main class="content-area">
         <div class="widget-card">
             <div class="widget-header">
-                <span id="dest-title" class="location-name">תל אביב / לימה</span>
+                <a id="dest-title" class="location-name" href="#" target="_blank" rel="noopener">תל אביב / לימה</a>
                 <span id="alt-badge" class="altitude-badge alt-low">⛰️ 0 מטרים</span>
             </div>
             <div id="alert-container"></div>
@@ -183,12 +187,31 @@
         });
     }
 
+    // --- Link helpers: make hotel names, city names and flight numbers tappable ---
+    function mapsUrl(query) {
+        return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(query);
+    }
+    function flightUrl(code) {
+        return 'https://www.flightaware.com/live/flight/' + encodeURIComponent(code);
+    }
+    function escapeHtml(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function linkifyFlights(text) {
+        const escaped = escapeHtml(text);
+        return escaped.replace(/\b([A-Z]{2}\d{2,4})\b/g, (m) =>
+            `<a class="inline-link" href="${flightUrl(m)}" target="_blank" rel="noopener">✈️ ${m}</a>`
+        );
+    }
+
     function selectDay(index) {
         activeDayIndex = index;
         renderSlider();
         const data = itinerary[index];
         document.getElementById('current-date').textContent = data.date;
-        document.getElementById('dest-title').textContent = data.stay_dest;
+        const destTitle = document.getElementById('dest-title');
+        destTitle.textContent = data.stay_dest + ' 📍';
+        destTitle.href = mapsUrl(data.stay_dest + ' פרו');
         const altBadge = document.getElementById('alt-badge');
         altBadge.textContent = `⛰️ ${data.altitude}m (${data.alt_label})`;
         altBadge.className = `altitude-badge alt-${data.alt_type}`;
@@ -197,7 +220,7 @@
         const transitSec = document.getElementById('transit-section');
         if (data.transit) {
             transitSec.style.display = 'block';
-            document.getElementById('transit-text').textContent = data.transit;
+            document.getElementById('transit-text').innerHTML = linkifyFlights(data.transit);
         } else {
             transitSec.style.display = 'none';
         }
@@ -209,12 +232,31 @@
             data.attractions.forEach((attr, i) => {
                 const card = document.createElement('div');
                 card.className = 'info-card';
-                card.innerHTML = `<div class="card-title">פעילות ${i+1}</div><div class="card-body">${attr}</div>`;
+                card.innerHTML = `<div class="card-title">פעילות ${i+1}</div><div class="card-body">${linkifyFlights(attr)}</div>`;
                 attrContainer.appendChild(card);
             });
         }
         document.getElementById('stay-dest').textContent = `יעד לינה: ${data.stay_dest}`;
-        document.getElementById('lodging-text').textContent = data.lodging || 'ללא מידע מפורט';
+        const lodgingEl = document.getElementById('lodging-text');
+        lodgingEl.innerHTML = '';
+        if (data.lodging) {
+            const lines = data.lodging.split('\n');
+            const link = document.createElement('a');
+            link.className = 'inline-link';
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.href = mapsUrl(data.lodging.replace(/\n/g, ', '));
+            link.textContent = lines[0] + ' 📍';
+            lodgingEl.appendChild(link);
+            if (lines.length > 1) {
+                const rest = document.createElement('div');
+                rest.className = 'lodging-rest';
+                rest.textContent = lines.slice(1).join('\n');
+                lodgingEl.appendChild(rest);
+            }
+        } else {
+            lodgingEl.textContent = 'ללא מידע מפורט';
+        }
     }
     renderSlider();
     selectDay(computeTodayIndex());
